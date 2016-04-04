@@ -1,7 +1,8 @@
+#include "minimax.hpp"
 #include <chrono>
+#include <cmath>
 #include <tuple>
 #include "board.hpp"
-#include <iostream>
 
 // declarations
 double minimax_depth(Board const& board, Player player, size_t depth,
@@ -14,17 +15,16 @@ double static_heuristic(Board const& board, Player player);
 double mobility(Board const& board, Player player);
 
 //! Determine move using the minimax algorithm.
-Move minimax_actor(Board const& board, Player player) {
+Move minimax_actor(Board const& board, Player player,
+                   boost::optional<duration> budget) {
   // time when the computation started
   auto start_time = std::chrono::steady_clock::now();
-  // time when the computation needs to be finished
-  auto end_time = start_time + std::chrono::seconds(60);
 
   // best move found so far
   Move best_move = {-1, -1};
 
   // expected average branching factor
-  double constexpr branch_fac = 8;
+  double constexpr branch_fac = 2;
 
   // time of the last iteration
   auto last_it_duration = std::chrono::seconds(1) / branch_fac;
@@ -32,12 +32,20 @@ Move minimax_actor(Board const& board, Player player) {
   size_t depth = 1;
   size_t const max_remaining_moves = board.size * board.size - board.disk_no();
 
+  // time when the computation needs to be finished
+  auto end_time =
+      start_time +
+      (budget ? std::chrono::duration_cast<duration>(
+                    *budget / std::ceil((double)max_remaining_moves / 2))
+              : std::chrono::duration_cast<duration>(std::chrono::seconds(30)));
+
   // iterative deepening
-  while (depth == 1 || (end_time - std::chrono::steady_clock::now() >
-                            branch_fac * last_it_duration &&
-                        depth <= max_remaining_moves)) {
-    std::cout << depth << ' ';
-    std::cout.flush();
+  while (
+      depth == 1 ||  // always do at least one iteration
+      (end_time - std::chrono::steady_clock::now() >
+           branch_fac * last_it_duration &&
+       end_time > std::chrono::steady_clock::now() &&  // guard against overflow
+       depth <= max_remaining_moves)) {
     auto iteration_start_time = std::chrono::steady_clock::now();
 
     // values for alpha-beta cutoff
@@ -73,9 +81,6 @@ Move minimax_actor(Board const& board, Player player) {
     last_it_duration = std::chrono::steady_clock::now() - iteration_start_time;
   }
 
-  std::cout << std::chrono::duration_cast<std::chrono::seconds>(
-                   std::chrono::steady_clock::now() - start_time)
-                   .count();
   return best_move;
 }
 
@@ -124,7 +129,7 @@ double minimax_depth(Board const& board, Player player, size_t depth,
  * best possible rating of the board for the player.
  */
 double heuristic(Board const& board, Player player) {
-  if (board.disk_no() > board.size * board.size - 4 || board.game_over()) {
+  if (board.disk_no() > board.size * board.size || board.game_over()) {
     return disk_parity(board, player);
   } else {
     return (6 * corners_captured(board, player) + 5 * stability(board, player) +

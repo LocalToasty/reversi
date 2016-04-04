@@ -6,11 +6,7 @@
 #include <vector>
 #include <boost/optional.hpp>
 
-enum Disk {
-  none = 0,
-  dark = 1,
-  light = -1
-};
+enum Disk { none = 0, dark = 1, light = -1 };
 
 using Player = Disk;
 
@@ -36,7 +32,6 @@ class Board {
 
   //! Determines all possible moves.
   std::vector<Move> legal_moves(Player player) const;
-
 
   boost::optional<Board> next_board(Move move, Player player) const;
   std::vector<std::pair<Move, Board>> next_boards(Player player) const;
