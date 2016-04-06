@@ -7,3 +7,5 @@ add_executable(reversi
                minimax.cpp)
 
 set_property(TARGET reversi PROPERTY CXX_STANDARD 14)
+
+install(TARGETS reversi RUNTIME DESTINATION bin)
