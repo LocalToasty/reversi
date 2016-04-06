@@ -4,19 +4,19 @@
 #include "minimax.hpp"
 #include "board.hpp"
 
-double heuristic(Board const& board, Player player);
+double composite_heuristic(Board const& board, Player player);
 
-BOOST_AUTO_TEST_CASE(test_heuristic) {
+BOOST_AUTO_TEST_CASE(test_composite_heuristic) {
   Board board;
 
   Player player = Player::dark;
 
-  // play a random game of reversi; check heuristic for each board
+  // play a random game of reversi; check composite_heuristic for each board
   while (!board.game_over()) {
-    double heuristic_dark = heuristic(board, Player::dark);
-    double heuristic_light = heuristic(board, Player::light);
+    double heuristic_dark = composite_heuristic(board, Player::dark);
+    double heuristic_light = composite_heuristic(board, Player::light);
 
-    // assert that heuristic stays within bounds
+    // assert that composite_heuristic stays within bounds
     BOOST_TEST(heuristic_dark >= -1);
     BOOST_TEST(heuristic_dark <= 1);
 

@@ -4,19 +4,68 @@
 #include <tuple>
 #include "board.hpp"
 
+using boost::optional;
+
 // declarations
-double minimax_depth(Board const& board, Player player, size_t depth,
-                     double alpha, double beta);
-double heuristic(Board const& board, Player player);
+double composite_heuristic(Board const& board, Player player);
 double corners_captured(Board const& board, Player player);
 double stability(Board const& board, Player player);
 double disk_parity(Board const& board, Player player);
 double static_heuristic(Board const& board, Player player);
 double mobility(Board const& board, Player player);
 
-//! Determine move using the minimax algorithm.
-Move minimax_actor(Board const& board, Player player,
-                   boost::optional<duration> budget) {
+//! Calculates the maximum reachable value of a board configuration.
+template <typename Heuristic>
+double minimax_depth(Board const& board, Player player, size_t depth,
+                     double alpha, double beta, Heuristic heuristic) {
+  if (depth == 0 || board.game_over()) {
+    // maximum iteration depth or final board state reached
+    return heuristic(board, player);
+  }
+
+  double best_value = alpha;
+
+  for (auto next : board.next_boards(player)) {
+    Move move;
+    Board next_board;
+    std::tie(move, next_board) = next;
+
+    Player opponent = (player == Disk::dark) ? Disk::light : Disk::dark;
+
+    double value = (!next_board.legal_moves(opponent).empty())
+                       ? -minimax_depth(next_board, opponent, depth - 1, -beta,
+                                        -alpha, heuristic)
+                       : minimax_depth(next_board, player, depth - 1, alpha,
+                                       beta, heuristic);
+
+    if (value > best_value) {
+      best_value = value;
+    }
+
+    if (value > alpha) {
+      alpha = value;
+    }
+
+    if (beta <= alpha) {
+      // beta cut off
+      return best_value;
+    }
+  }
+
+  return best_value;
+}
+
+/*! Determines move using the minimax algorithm.
+ *
+ * \param heuristic  a function rating the value of a board. The heuristic is
+ * expected to return a value between -1 and 1, where -1 is the worst and 1 the
+ * best possible result.
+ *
+ * \returns the best move found.
+ */
+template <typename Heuristic>
+Move generic_minimax_actor(Board const& board, Player player,
+                           optional<duration> budget, Heuristic heuristic) {
   // time when the computation started
   auto start_time = std::chrono::steady_clock::now();
 
@@ -62,10 +111,11 @@ Move minimax_actor(Board const& board, Player player,
 
       Player opponent = (player == Disk::dark) ? Disk::light : Disk::dark;
 
-      double value =
-          (!next_board.legal_moves(opponent).empty())
-              ? -minimax_depth(next_board, opponent, depth - 1, -beta, -alpha)
-              : minimax_depth(next_board, player, depth - 1, alpha, beta);
+      double value = (!next_board.legal_moves(opponent).empty())
+                         ? -minimax_depth(next_board, opponent, depth - 1,
+                                          -beta, -alpha, heuristic)
+                         : minimax_depth(next_board, player, depth - 1, alpha,
+                                         beta, heuristic);
 
       if (value > best_value) {
         best_value = value;
@@ -84,43 +134,12 @@ Move minimax_actor(Board const& board, Player player,
   return best_move;
 }
 
-//! Calculates the maximum reachable value of a board configuration
-double minimax_depth(Board const& board, Player player, size_t depth,
-                     double alpha, double beta) {
-  if (depth == 0 || board.game_over()) {
-    // maximum iteration depth or final board state reached
-    return heuristic(board, player);
-  }
-
-  double best_value = alpha;
-
-  for (auto next : board.next_boards(player)) {
-    Move move;
-    Board next_board;
-    std::tie(move, next_board) = next;
-
-    Player opponent = (player == Disk::dark) ? Disk::light : Disk::dark;
-
-    double value =
-        (!next_board.legal_moves(opponent).empty())
-            ? -minimax_depth(next_board, opponent, depth - 1, -beta, -alpha)
-            : minimax_depth(next_board, player, depth - 1, alpha, beta);
-
-    if (value > best_value) {
-      best_value = value;
-    }
-
-    if (value > alpha) {
-      alpha = value;
-    }
-
-    if (beta <= alpha) {
-      // beta cut off
-      return best_value;
-    }
-  }
-
-  return best_value;
+/*! The default minimax actor.
+ * \see generic_minimax_actor
+ */
+Move minimax_actor(Board const& board, Player player,
+                   optional<duration> budget) {
+  return generic_minimax_actor(board, player, budget, composite_heuristic);
 }
 
 /*! Rates a board.
@@ -128,7 +147,7 @@ double minimax_depth(Board const& board, Player player, size_t depth,
  * \returnsa value in the interval [-1, 1], where -1 is the worst and 1 is the
  * best possible rating of the board for the player.
  */
-double heuristic(Board const& board, Player player) {
+double composite_heuristic(Board const& board, Player player) {
   if (board.disk_no() > board.size * board.size || board.game_over()) {
     return disk_parity(board, player);
   } else {

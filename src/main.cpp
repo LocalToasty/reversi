@@ -3,9 +3,9 @@
 #include "reversi.hpp"
 
 int main() {
-  play_reversi(
-      minimax_actor, boost::none,
-      // std::chrono::duration_cast<duration>(std::chrono::minutes(30)),
-      minimax_actor,
-      std::chrono::duration_cast<duration>(std::chrono::minutes(30)), true);
+  play_reversi(minimax_actor,
+               std::chrono::duration_cast<duration>(std::chrono::minutes(5)),
+               minimax_actor,
+               std::chrono::duration_cast<duration>(std::chrono::minutes(5)),
+               true);
 }
