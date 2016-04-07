@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstdint>
+#include <ostream>
 #include <vector>
 #include <boost/optional.hpp>
 
@@ -52,5 +53,7 @@ class Board {
    */
   std::array<std::array<Disk, size>, size> _squares;
 };
+
+std::ostream& operator<<(std::ostream& out, Board const& board);
 
 #endif

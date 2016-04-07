@@ -196,3 +196,36 @@ Board::begin() {
 std::array<std::array<Disk, Board::size>, Board::size>::iterator Board::end() {
   return _squares.end();
 }
+
+std::ostream& operator<<(std::ostream& out, Board const& board) {
+  // print column descriptors
+  out << std::endl << ' ';
+  for (int col = 0; col < board.size; col++) {
+    out << (char)('a' + col);
+  }
+  out << std::endl;
+
+  for (int row = 0; row < board.size; row++) {
+    out << row + 1;
+
+    for (int col = 0; col < board.size; col++) {
+      switch (board[col][row]) {
+        case Disk::none:
+          out << '.';
+          break;
+
+        case Disk::dark:
+          out << 'x';
+          break;
+
+        case Disk::light:
+          out << 'o';
+          break;
+      }
+    }
+
+    out << std::endl;
+  }
+
+  return out;
+}

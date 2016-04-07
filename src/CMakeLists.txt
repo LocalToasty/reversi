@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.0)
 add_executable(reversi
                main.cpp
                board.cpp
-               reversi.cpp
-               minimax.cpp)
+               human.cpp
+               minimax.cpp
+               reversi.cpp)
 
 set_property(TARGET reversi PROPERTY CXX_STANDARD 14)
 

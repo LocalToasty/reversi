@@ -1,15 +1,16 @@
 #include <chrono>
 #include <iostream>
+#include "human.hpp"
 #include "minimax.hpp"
 #include "reversi.hpp"
 
 int main() {
   // play a game of reversi
   Player winner = play_reversi(
+      human_actor,
+      std::chrono::duration_cast<duration>(std::chrono::minutes(30)),
       minimax_actor,
-      std::chrono::duration_cast<duration>(std::chrono::minutes(5)),
-      minimax_actor,
-      std::chrono::duration_cast<duration>(std::chrono::minutes(5)), true);
+      std::chrono::duration_cast<duration>(std::chrono::minutes(30)), false);
 
   // announce winner
   switch (winner) {

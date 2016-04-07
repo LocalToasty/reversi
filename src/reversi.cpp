@@ -6,39 +6,6 @@
 
 using boost::optional;
 
-std::ostream& operator<<(std::ostream& out, Board const& board) {
-  // print column descriptors
-  out << std::endl << ' ';
-  for (int col = 0; col < board.size; col++) {
-    out << (char)('a' + col);
-  }
-  out << std::endl;
-
-  for (int row = 0; row < board.size; row++) {
-    out << row + 1;
-
-    for (int col = 0; col < board.size; col++) {
-      switch (board[col][row]) {
-        case Disk::none:
-          out << '.';
-          break;
-
-        case Disk::dark:
-          out << 'x';
-          break;
-
-        case Disk::light:
-          out << 'o';
-          break;
-      }
-    }
-
-    out << std::endl;
-  }
-
-  return out;
-}
-
 /*! Plays a game of reversi.
  *
  * The time budgets describe what amount of time each actor has in total to do
