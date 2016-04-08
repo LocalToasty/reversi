@@ -66,6 +66,11 @@ double minimax_depth(Board const& board, Player player, size_t depth,
 template <typename Heuristic>
 Move generic_minimax_actor(Board const& board, Player player,
                            optional<duration> budget, Heuristic heuristic) {
+  if (board.disk_no() == 4) {
+    // for the first turn, all possible moves are the same
+    return board.legal_moves(player)[0];
+  }
+
   // time when the computation started
   auto start_time = std::chrono::steady_clock::now();
 
