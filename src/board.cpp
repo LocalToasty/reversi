@@ -45,7 +45,7 @@ bool Board::legal_move(Move move, Player player) const {
       int px = x + dx;
       int py = y + dy;
 
-      while (px >= 0 && px < size && py >= 0 && py < size) {
+      while (px >= 0 && (std::size_t)px < size && py >= 0 && (std::size_t)py < size) {
         if (_squares[px][py] == Disk::none) {
           // an empty space is interrupting the chain
           // there are no disks to be flipped here
@@ -147,7 +147,7 @@ boost::optional<Board> Board::next_board(Move move, Player player) const {
       int px = x + dx;
       int py = y + dy;
 
-      while (px >= 0 && px < size && py >= 0 && py < size) {
+      while (px >= 0 && (std::size_t)px < size && py >= 0 && (std::size_t)py < size) {
         if (_squares[px][py] == Disk::none) {
           // an empty space is interrupting the chain
           // there are no disks to be flipped here
@@ -200,15 +200,15 @@ std::array<std::array<Disk, Board::size>, Board::size>::iterator Board::end() {
 std::ostream& operator<<(std::ostream& out, Board const& board) {
   // print column descriptors
   out << std::endl << ' ';
-  for (int col = 0; col < board.size; col++) {
+  for (int col = 0; (std::size_t)col < board.size; col++) {
     out << (char)('a' + col);
   }
   out << std::endl;
 
-  for (int row = 0; row < board.size; row++) {
+  for (int row = 0; (std::size_t)row < board.size; row++) {
     out << row + 1;
 
-    for (int col = 0; col < board.size; col++) {
+    for (int col = 0; (std::size_t)col < board.size; col++) {
       switch (board[col][row]) {
         case Disk::none:
           out << '.';

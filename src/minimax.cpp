@@ -194,7 +194,7 @@ double corners_captured(Board const& board, Player player) {
  * A disk is semi-stable, if it can not be flipped within one turn.
  */
 std::array<std::array<bool, Board::size>, Board::size> semi_stable_disks(
-    Board const& board, Player player) {
+    Board const& board) {
   std::array<std::array<bool, Board::size>, Board::size> semi_stable;
 
   // initialize all disks as stable
@@ -211,7 +211,7 @@ std::array<std::array<bool, Board::size>, Board::size> semi_stable_disks(
       for (size_t x = 0; x < board.size; x++) {
         for (size_t y = 0; y < board.size; y++) {
           if (next_board[x][y] != board[x][y] && board[x][y] != Disk::none) {
-            semi_stable[x][y] == false;
+            semi_stable[x][y] = false;
           }
         }
       }
@@ -227,7 +227,7 @@ std::array<std::array<bool, Board::size>, Board::size> semi_stable_disks(
  */
 bool in_full_row(Board const& board, size_t x, size_t y) {
   // row / col
-  for (int i = 0; i < board.size; i++) {
+  for (std::size_t i = 0; i < board.size; i++) {
     if (board[i][y] == Disk::none || board[x][i] == Disk::none) {
       // row / col is not full
       return false;
@@ -243,7 +243,7 @@ bool in_full_row(Board const& board, size_t x, size_t y) {
     j = y - x;
   }
 
-  while (i < board.size && j < board.size) {
+  while ((std::size_t)i < board.size && (std::size_t)j < board.size) {
     if (board[i][j] == Disk::none) {
       // diagonal is not full
       return false;
@@ -261,7 +261,7 @@ bool in_full_row(Board const& board, size_t x, size_t y) {
     j = y - (board.size - x - 1);
   }
 
-  while (i >= 0 && j < board.size) {
+  while (i >= 0 && (std::size_t)j < board.size) {
     if (board[i][j] == Disk::none) {
       // diagonal is not full
       return false;
@@ -276,10 +276,8 @@ bool in_full_row(Board const& board, size_t x, size_t y) {
 }
 
 //! Checks if the given coordinates are outside of the board.
-bool is_edge(Board const& board, size_t x, size_t y) {
-  // As x and y are size_ts, the condition x < 0 is always false.
-  // This is compensated by the negative overflow of the size_t.
-  return x < 0 || x >= board.size || y < 0 || y >= board.size;
+bool is_edge(Board const& board, int x, int y) {
+  return x < 0 || (std::size_t)x >= board.size || y < 0 || (std::size_t)y >= board.size;
 }
 
 /*! Checks if all neighbors of a disk are stable.
@@ -309,7 +307,7 @@ bool neighbours_stable(
  * A disk is considered stable, if it cannot to be flipped any more.
  */
 std::array<std::array<bool, Board::size>, Board::size> stable_disks(
-    Board const& board, Player player) {
+    Board const& board) {
   std::array<std::array<bool, Board::size>, Board::size> stable;
 
   // all disks which are in a full row, column and diagonals are guaranteed to
@@ -345,8 +343,8 @@ double stability(Board const& board, Player player) {
   double dark_score = 0;
   double light_score = 0;
 
-  auto stable = stable_disks(board, player);
-  auto semi_stable = semi_stable_disks(board, player);
+  auto stable = stable_disks(board);
+  auto semi_stable = semi_stable_disks(board);
 
   for (size_t x = 0; x < board.size; x++) {
     for (size_t y = 0; y < board.size; y++) {
