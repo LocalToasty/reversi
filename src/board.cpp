@@ -2,6 +2,8 @@
 #include <tuple>
 #include <boost/optional.hpp>
 
+using std::size_t;
+
 Board::Board() {
   // set up initial disks
   for (size_t x = 0; x < size; x++) {
@@ -13,12 +15,11 @@ Board::Board() {
   _squares[size / 2 - 1][size / 2] = Disk::dark;
 }
 
-std::array<Disk, Board::size>& Board::operator[](std::size_t index) {
+std::array<Disk, Board::size>& Board::operator[](size_t index) {
   return _squares[index];
 }
 
-std::array<Disk, Board::size> const& Board::operator[](
-    std::size_t index) const {
+std::array<Disk, Board::size> const& Board::operator[](size_t index) const {
   return _squares[index];
 }
 
@@ -45,7 +46,7 @@ bool Board::legal_move(Move move, Player player) const {
       int px = x + dx;
       int py = y + dy;
 
-      while (px >= 0 && (std::size_t)px < size && py >= 0 && (std::size_t)py < size) {
+      while (px >= 0 && (size_t)px < size && py >= 0 && (size_t)py < size) {
         if (_squares[px][py] == Disk::none) {
           // an empty space is interrupting the chain
           // there are no disks to be flipped here
@@ -76,8 +77,8 @@ bool Board::legal_move(Move move, Player player) const {
 std::vector<Move> Board::legal_moves(Player player) const {
   std::vector<Move> moves;
 
-  for (std::size_t y = 0; y < size; y++) {
-    for (std::size_t x = 0; x < size; x++) {
+  for (size_t y = 0; y < size; y++) {
+    for (size_t x = 0; x < size; x++) {
       if (legal_move({x, y}, player)) moves.push_back({x, y});
     }
   }
@@ -147,7 +148,7 @@ boost::optional<Board> Board::next_board(Move move, Player player) const {
       int px = x + dx;
       int py = y + dy;
 
-      while (px >= 0 && (std::size_t)px < size && py >= 0 && (std::size_t)py < size) {
+      while (px >= 0 && (size_t)px < size && py >= 0 && (size_t)py < size) {
         if (_squares[px][py] == Disk::none) {
           // an empty space is interrupting the chain
           // there are no disks to be flipped here
@@ -200,15 +201,15 @@ std::array<std::array<Disk, Board::size>, Board::size>::iterator Board::end() {
 std::ostream& operator<<(std::ostream& out, Board const& board) {
   // print column descriptors
   out << std::endl << ' ';
-  for (int col = 0; (std::size_t)col < board.size; col++) {
+  for (int col = 0; (size_t)col < board.size; col++) {
     out << (char)('a' + col);
   }
   out << std::endl;
 
-  for (int row = 0; (std::size_t)row < board.size; row++) {
+  for (int row = 0; (size_t)row < board.size; row++) {
     out << row + 1;
 
-    for (int col = 0; (std::size_t)col < board.size; col++) {
+    for (int col = 0; (size_t)col < board.size; col++) {
       switch (board[col][row]) {
         case Disk::none:
           out << '.';

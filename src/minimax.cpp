@@ -4,7 +4,9 @@
 #include <tuple>
 #include "board.hpp"
 
+namespace ch = std::chrono;
 using boost::optional;
+using std::size_t;
 
 // declarations
 double composite_heuristic(Board const& board, Player player);
@@ -72,7 +74,7 @@ Move generic_minimax_actor(Board const& board, Player player,
   }
 
   // time when the computation started
-  auto start_time = std::chrono::steady_clock::now();
+  auto start_time = ch::steady_clock::now();
 
   // best move found so far
   Move best_move = {-1, -1};
@@ -81,7 +83,7 @@ Move generic_minimax_actor(Board const& board, Player player,
   double constexpr branch_fac = 2;
 
   // time of the last iteration
-  auto last_it_duration = std::chrono::seconds(1) / branch_fac;
+  auto last_it_duration = ch::seconds(1) / branch_fac;
 
   size_t depth = 1;
   size_t const max_remaining_moves = board.size * board.size - board.disk_no();
@@ -89,18 +91,16 @@ Move generic_minimax_actor(Board const& board, Player player,
   // time when the computation needs to be finished
   auto end_time =
       start_time +
-      (budget ? std::chrono::duration_cast<duration>(
+      (budget ? ch::duration_cast<duration>(
                     *budget / std::ceil((double)max_remaining_moves / 2))
-              : std::chrono::duration_cast<duration>(std::chrono::seconds(30)));
+              : ch::duration_cast<duration>(ch::seconds(30)));
 
   // iterative deepening
-  while (
-      depth == 1 ||  // always do at least one iteration
-      (end_time - std::chrono::steady_clock::now() >
-           branch_fac * last_it_duration &&
-       end_time > std::chrono::steady_clock::now() &&  // guard against overflow
-       depth <= max_remaining_moves)) {
-    auto iteration_start_time = std::chrono::steady_clock::now();
+  while (depth == 1 ||  // always do at least one iteration
+         (end_time - ch::steady_clock::now() > branch_fac * last_it_duration &&
+          end_time > ch::steady_clock::now() &&  // guard against overflow
+          depth <= max_remaining_moves)) {
+    auto iteration_start_time = ch::steady_clock::now();
 
     // values for alpha-beta cutoff
     double alpha = -1;
@@ -133,7 +133,7 @@ Move generic_minimax_actor(Board const& board, Player player,
     }
 
     depth++;
-    last_it_duration = std::chrono::steady_clock::now() - iteration_start_time;
+    last_it_duration = ch::steady_clock::now() - iteration_start_time;
   }
 
   return best_move;
@@ -227,7 +227,7 @@ std::array<std::array<bool, Board::size>, Board::size> semi_stable_disks(
  */
 bool in_full_row(Board const& board, size_t x, size_t y) {
   // row / col
-  for (std::size_t i = 0; i < board.size; i++) {
+  for (size_t i = 0; i < board.size; i++) {
     if (board[i][y] == Disk::none || board[x][i] == Disk::none) {
       // row / col is not full
       return false;
@@ -243,7 +243,7 @@ bool in_full_row(Board const& board, size_t x, size_t y) {
     j = y - x;
   }
 
-  while ((std::size_t)i < board.size && (std::size_t)j < board.size) {
+  while ((size_t)i < board.size && (size_t)j < board.size) {
     if (board[i][j] == Disk::none) {
       // diagonal is not full
       return false;
@@ -261,7 +261,7 @@ bool in_full_row(Board const& board, size_t x, size_t y) {
     j = y - (board.size - x - 1);
   }
 
-  while (i >= 0 && (std::size_t)j < board.size) {
+  while (i >= 0 && (size_t)j < board.size) {
     if (board[i][j] == Disk::none) {
       // diagonal is not full
       return false;
@@ -277,7 +277,7 @@ bool in_full_row(Board const& board, size_t x, size_t y) {
 
 //! Checks if the given coordinates are outside of the board.
 bool is_edge(Board const& board, int x, int y) {
-  return x < 0 || (std::size_t)x >= board.size || y < 0 || (std::size_t)y >= board.size;
+  return x < 0 || (size_t)x >= board.size || y < 0 || (size_t)y >= board.size;
 }
 
 /*! Checks if all neighbors of a disk are stable.

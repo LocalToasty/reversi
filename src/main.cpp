@@ -7,6 +7,7 @@
 #include "reversi.hpp"
 
 namespace po = boost::program_options;
+namespace ch = std::chrono;
 using boost::optional;
 
 optional<std::function<Move(Board const&, Player, optional<duration>)>>
@@ -65,15 +66,13 @@ int main(int argc, char** argv) {
 
   // if the budget is set to 0, there is no time limit
   optional<duration> dark_budget =
-      (dark_time == 0)
-          ? boost::none
-          : (optional<duration>)(std::chrono::duration_cast<duration>(
-                std::chrono::minutes(dark_time)));
+      (dark_time == 0) ? boost::none
+                       : (optional<duration>)(ch::duration_cast<duration>(
+                             ch::minutes(dark_time)));
   optional<duration> light_budget =
-      (light_time == 0)
-          ? boost::none
-          : (optional<duration>)(std::chrono::duration_cast<duration>(
-                std::chrono::minutes(light_time)));
+      (light_time == 0) ? boost::none
+                        : (optional<duration>)(ch::duration_cast<duration>(
+                              ch::minutes(light_time)));
 
   bool verbose = (vm.count("verbose") != 0);
 

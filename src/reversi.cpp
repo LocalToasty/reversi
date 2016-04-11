@@ -4,6 +4,7 @@
 #include <iostream>
 #include "board.hpp"
 
+namespace ch = std::chrono;
 using boost::optional;
 
 /*! Plays a game of reversi.
@@ -31,13 +32,12 @@ Player play_reversi(Actor dark_actor, optional<duration> dark_time_budget,
     Move move = {0, 0};
     switch (player) {
       case Player::dark: {
-        auto start_time = std::chrono::steady_clock::now();
+        auto start_time = ch::steady_clock::now();
         move = dark_actor(board, Player::dark, dark_time_budget);
-        auto end_time = std::chrono::steady_clock::now();
+        auto end_time = ch::steady_clock::now();
 
         if (dark_time_budget) {
-          auto needed_time =
-              std::chrono::duration_cast<duration>(end_time - start_time);
+          auto needed_time = ch::duration_cast<duration>(end_time - start_time);
 
           if (needed_time > dark_time_budget) {
             // time budget expended; default win for light
@@ -48,8 +48,7 @@ Player play_reversi(Actor dark_actor, optional<duration> dark_time_budget,
 
           if (verbose) {
             std::cout << "remaining time: "
-                      << std::chrono::duration_cast<std::chrono::seconds>(
-                             *dark_time_budget)
+                      << ch::duration_cast<ch::seconds>(*dark_time_budget)
                              .count()
                       << " s";
           }
@@ -59,13 +58,12 @@ Player play_reversi(Actor dark_actor, optional<duration> dark_time_budget,
       }
 
       case Player::light: {
-        auto start_time = std::chrono::steady_clock::now();
+        auto start_time = ch::steady_clock::now();
         move = light_actor(board, Player::light, light_time_budget);
-        auto end_time = std::chrono::steady_clock::now();
+        auto end_time = ch::steady_clock::now();
 
         if (light_time_budget) {
-          auto needed_time =
-              std::chrono::duration_cast<duration>(end_time - start_time);
+          auto needed_time = ch::duration_cast<duration>(end_time - start_time);
 
           if (needed_time > light_time_budget) {
             // time budget expended; default win for light
@@ -76,8 +74,7 @@ Player play_reversi(Actor dark_actor, optional<duration> dark_time_budget,
 
           if (verbose) {
             std::cout << "remaining time: "
-                      << std::chrono::duration_cast<std::chrono::seconds>(
-                             *light_time_budget)
+                      << ch::duration_cast<ch::seconds>(*light_time_budget)
                              .count()
                       << " s";
           }

@@ -6,6 +6,7 @@
 #include "board.hpp"
 #include "reversi.hpp"
 
+namespace ch = std::chrono;
 using boost::optional;
 
 //! Reads a move from the user.
@@ -30,7 +31,7 @@ optional<Move> read_move() {
 }
 
 Move human_actor(Board const& board, Player player, optional<duration> budget) {
-  auto start_time = std::chrono::steady_clock::now();
+  auto start_time = ch::steady_clock::now();
 
   // print player
   switch (player) {
@@ -52,9 +53,8 @@ Move human_actor(Board const& board, Player player, optional<duration> budget) {
     if (budget) {
       // print remaining time
       std::cout << "You have "
-                << std::chrono::duration_cast<std::chrono::seconds>(
-                       *budget -
-                       (std::chrono::steady_clock::now() - start_time))
+                << ch::duration_cast<ch::seconds>(
+                       *budget - (ch::steady_clock::now() - start_time))
                        .count()
                 << " seconds left." << std::endl;
     }
